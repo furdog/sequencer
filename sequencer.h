@@ -82,7 +82,7 @@ static bool sequencer_add_entry(struct sequencer *self, uint32_t timer_ms,
 
 		entry->timer_ms = timer_ms;
 		entry->event    = event;
-		self->_len     += 1;
+		self->_len     += 1u;
 	}
 
 	return has_capacity;
@@ -113,7 +113,7 @@ static uint8_t sequencer_update(struct sequencer *self, uint32_t delta_time_ms)
 
 		if (self->_timer_ms >= entry->timer_ms) {
 			self->_timer_ms -= entry->timer_ms;
-			self->_iter     += 1;
+			self->_iter     += 1u;
 
 			event = entry->event;
 		}
