@@ -57,7 +57,7 @@ static void sequencer_init(struct sequencer *self,
 			   size_t capacity)
 {
 	assert(self && entries && (capacity > 0u));
-	
+
 	self->_entries  = entries;
 	self->_capacity = capacity;
 	self->_len      = 0u;
@@ -74,14 +74,15 @@ static bool sequencer_add_entry(struct sequencer *self, uint32_t timer_ms,
 	bool has_capacity = true;
 
 	assert(self);
-	
+
 	if (self->_len >= self->_capacity) {
 		has_capacity = false;
 	} else {
-		struct sequencer_entry *entry = &self->_entries[self->_iter];
+		struct sequencer_entry *entry = &self->_entries[self->_len];
+
 		entry->timer_ms = timer_ms;
 		entry->event    = event;
-		self->_len++;
+		self->_len     += 1;
 	}
 
 	return has_capacity;
@@ -112,7 +113,8 @@ static uint8_t sequencer_update(struct sequencer *self, uint32_t delta_time_ms)
 
 		if (self->_timer_ms >= entry->timer_ms) {
 			self->_timer_ms -= entry->timer_ms;
-			self->_iter++;
+			self->_iter     += 1;
+
 			event = entry->event;
 		}
 	/* If it's a last element in a sequence - retry */
