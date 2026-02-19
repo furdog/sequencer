@@ -27,8 +27,11 @@
  * Be free, be wise and take care of yourself!
  * With best wishes and respect, furdog
  */
+#pragma once
+
 #include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
 #include <assert.h>
 
 /** Simple sequencer entry and its functions */
@@ -36,14 +39,6 @@ struct sequencer_entry {
 	uint16_t timer_ms; /**< How long to wait before firing an event */
 	uint8_t  event;    /**< Event to fire */
 };
-
-void _sequencer_entry_init(struct sequencer_entry *self)
-{
-	assert(self);
-
-	self->timer_ms = 0u;
-	self->event    = 0u;
-}
 
 /** Sequencer data structure */
 struct sequencer {
@@ -57,8 +52,9 @@ struct sequencer {
 };
 
 /** Initializes sequencer, takes entries array and its capacity to work with */
-void sequencer_init(struct sequencer *self, struct sequencer_entry *entries,
-		    size_t capacity)
+static void sequencer_init(struct sequencer *self,
+			   struct sequencer_entry *entries,
+			   size_t capacity)
 {
 	assert(self && entries && (capacity > 0u));
 	
@@ -72,8 +68,8 @@ void sequencer_init(struct sequencer *self, struct sequencer_entry *entries,
 }
 
 /** Adds entry into a sequencer, return false if no capacity */
-bool sequencer_add_entry(struct sequencer *self, uint32_t timer_ms,
-			 uint8_t event)
+static bool sequencer_add_entry(struct sequencer *self, uint32_t timer_ms,
+				uint8_t event)
 {
 	bool has_capacity = true;
 
@@ -92,7 +88,7 @@ bool sequencer_add_entry(struct sequencer *self, uint32_t timer_ms,
 }
 
 /** Returns sequencer entry count. */
-size_t sequencer_get_entry_count(struct sequencer *self)
+static size_t sequencer_get_entry_count(struct sequencer *self)
 {
 	assert(self);
 
@@ -102,7 +98,7 @@ size_t sequencer_get_entry_count(struct sequencer *self)
 /** Updates sequencer, returns an event if exceed single entry timer.
  * Advances to the next entry after entry timer exceed.
  * Resets entry count to zero if last entry processed */
-uint8_t sequencer_update(struct sequencer *self, uint32_t delta_time_ms)
+static uint8_t sequencer_update(struct sequencer *self, uint32_t delta_time_ms)
 {
 	uint8_t event = 0u;
 
