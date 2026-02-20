@@ -45,7 +45,7 @@ enum sequencer_mode {
 /** Simple sequencer entry and its functions */
 struct sequencer_entry {
 	uint16_t timer_ms; /**< How long to wait before firing an event */
-	uint8_t  event;    /**< Event to fire */
+	uint16_t event;    /**< Event to fire */
 };
 
 /** Sequencer data structure */
@@ -88,7 +88,7 @@ static void sequencer_set_mode(struct sequencer *self, uint8_t mode)
 }
 
 /** Adds entry into a sequencer, return false if no capacity */
-static bool sequencer_add_entry(struct sequencer *self, uint32_t timer_ms,
+static bool sequencer_add_entry(struct sequencer *self, uint16_t timer_ms,
 				uint8_t event)
 {
 	bool has_capacity = true;
@@ -138,7 +138,8 @@ static void sequencer_clean(struct sequencer *self)
 /** Updates sequencer, returns an event if exceed single entry timer.
  * Advances to the next entry after entry timer exceed.
  * Resets entry count to zero if last entry processed */
-static uint8_t sequencer_update(struct sequencer *self, uint32_t delta_time_ms)
+static uint16_t sequencer_update(struct sequencer *self,
+				 uint16_t delta_time_ms)
 {
 	uint8_t event = 0u;
 
