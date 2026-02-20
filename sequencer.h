@@ -34,6 +34,14 @@
 #include <stddef.h>
 #include <assert.h>
 
+/** Sequencer working mode. Changes behaviour */
+enum sequencer_mode {
+	SEQUENCER_MODE_SINGLE, /**< Sequencer will do its work only once */
+	SEQUENCER_MODE_REPEAT, /**< Sequencer will repeat its work forever */
+
+	SEQUENCER_MODES /**< Total count of sequencer modes */
+};
+
 /** Simple sequencer entry and its functions */
 struct sequencer_entry {
 	uint16_t timer_ms; /**< How long to wait before firing an event */
@@ -49,6 +57,8 @@ struct sequencer {
 	size_t _iter;
 
 	uint16_t _timer_ms;
+
+	uint8_t  _mode;
 };
 
 /** Initializes sequencer, takes entries array and its capacity to work with */
@@ -65,6 +75,16 @@ static void sequencer_init(struct sequencer *self,
 	self->_iter = 0u;
 
 	self->_timer_ms = 0u;
+
+	self->_mode = SEQUENCER_MODE_SINGLE;
+}
+
+/** Sets sequencer working mode. SEQUENCER_MODE_SINGLE is default */
+static void sequencer_set_mode(struct sequencer *self, uint8_t mode)
+{
+	assert(self && (mode < (uint8_t)SEQUENCER_MODES));
+
+	self->_mode = mode;
 }
 
 /** Adds entry into a sequencer, return false if no capacity */
@@ -88,12 +108,31 @@ static bool sequencer_add_entry(struct sequencer *self, uint32_t timer_ms,
 	return has_capacity;
 }
 
-/** Returns sequencer entry count. */
+/** Returns sequencer entry count */
 static size_t sequencer_get_entry_count(struct sequencer *self)
 {
 	assert(self);
 
 	return self->_len;
+}
+
+/** Resets the sequencer (starts from very beginning) */
+static void sequencer_reset(struct sequencer *self)
+{
+	assert(self);
+
+	self->_iter     = 0u;
+	self->_timer_ms = 0u;
+}
+
+/** Resets and cleanups the sequencer (zeroes entry count) */
+static void sequencer_clean(struct sequencer *self)
+{
+	assert(self);
+
+	sequencer_reset(self);
+
+	self->_len      = 0u;
 }
 
 /** Updates sequencer, returns an event if exceed single entry timer.
@@ -105,24 +144,33 @@ static uint8_t sequencer_update(struct sequencer *self, uint32_t delta_time_ms)
 
 	assert(self);
 
-	/* If we have elements in sequence - do checks and emit events */
+	/* If last element */
+	if (self->_iter >= self->_len) {
+		/* And mode is REPEAT*/
+		if (self->_mode == (uint8_t)SEQUENCER_MODE_REPEAT) {
+			/* Repeat the sequence */
+			self->_iter = 0u;
+		} else {
+			/* Else cleanup */
+			sequencer_clean(self);
+		}
+	}
+
+	/* If we have elements in sequence */
 	if (self->_iter < self->_len) {
 		struct sequencer_entry *entry = &self->_entries[self->_iter];
 
 		self->_timer_ms += delta_time_ms;
 
+		/* Wait for timer to exceed */
 		if (self->_timer_ms >= entry->timer_ms) {
 			self->_timer_ms -= entry->timer_ms;
 			self->_iter     += 1u;
 
+			/* and emit event */
 			event = entry->event;
 		}
-	/* If it's a last element in a sequence - retry */
-	} else if (self->_iter >= self->_len) {
-		self->_len      = 0u;
-		self->_iter     = 0u;
-		self->_timer_ms = 0u;
-	} else {}
+	}
 
 	return event;
 }

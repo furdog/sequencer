@@ -32,6 +32,29 @@ void sequencer_test_generic(struct sequencer *self)
 	assert(sequencer_get_entry_count(self) == 3u);
 	assert(sequencer_update(self, 0u) == 0u);
 	assert(sequencer_get_entry_count(self) == 0u);
+
+	/* Test repeat mode */
+	sequencer_set_mode(self, SEQUENCER_MODE_REPEAT);
+	assert(sequencer_add_entry(self, 100u, 38u) == true);
+	assert(sequencer_update(self, 100u) == 38u);
+	assert(sequencer_update(self, 100u) == 38u);
+	assert(sequencer_update(self, 100u) == 38u);
+	sequencer_set_mode(self, SEQUENCER_MODE_SINGLE);
+	assert(sequencer_update(self, 100u) == 0u);
+
+	/* Test reset */
+	assert(sequencer_add_entry(self, 100u, 37u) == true);
+	assert(sequencer_add_entry(self, 100u, 38u) == true);
+	assert(sequencer_update(self, 100u) == 37u);
+	sequencer_reset(self);
+	assert(sequencer_update(self, 100u) == 37u);
+	assert(sequencer_update(self, 100u) == 38u);
+
+	/* Test clean */
+	assert(sequencer_get_entry_count(self) == 2u);
+	sequencer_clean(self);
+	assert(sequencer_get_entry_count(self) == 0u);
+	assert(sequencer_update(self, 100u) == 0u);
 }
 
 int main()
