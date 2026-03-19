@@ -29,10 +29,10 @@
  */
 #pragma once
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <stddef.h>
 #include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
 /** Sequencer working mode. Changes behaviour */
 enum sequencer_mode {
@@ -45,32 +45,31 @@ enum sequencer_mode {
 /** Simple sequencer entry and its functions */
 struct sequencer_entry {
 	uint16_t timer_ms; /**< How long to wait before firing an event */
-	uint16_t event;    /**< Event to fire */
+	uint16_t event;	   /**< Event to fire */
 };
 
 /** Sequencer data structure */
 struct sequencer {
 	struct sequencer_entry *_entries;
-	size_t _capacity;
-	size_t _len;
+	size_t			_capacity;
+	size_t			_len;
 
 	size_t _iter;
 
 	uint16_t _timer_ms;
 
-	uint8_t  _mode;
+	uint8_t _mode;
 };
 
 /** Initializes sequencer, takes entries array and its capacity to work with */
-static void sequencer_init(struct sequencer *self,
-			   struct sequencer_entry *entries,
-			   size_t capacity)
+static void sequencer_init(struct sequencer	  *self,
+			   struct sequencer_entry *entries, size_t capacity)
 {
 	assert(self && entries && (capacity > 0u));
 
-	self->_entries  = entries;
+	self->_entries	= entries;
 	self->_capacity = capacity;
-	self->_len      = 0u;
+	self->_len	= 0u;
 
 	self->_iter = 0u;
 
@@ -100,9 +99,9 @@ static bool sequencer_add_entry(struct sequencer *self, uint16_t timer_ms,
 	} else {
 		struct sequencer_entry *entry = &self->_entries[self->_len];
 
-		entry->timer_ms = timer_ms;
-		entry->event    = event;
-		self->_len     += 1u;
+		entry->timer_ms	 = timer_ms;
+		entry->event	 = event;
+		self->_len	+= 1u;
 	}
 
 	return has_capacity;
@@ -121,7 +120,7 @@ static void sequencer_reset(struct sequencer *self)
 {
 	assert(self);
 
-	self->_iter     = 0u;
+	self->_iter	= 0u;
 	self->_timer_ms = 0u;
 }
 
@@ -132,14 +131,14 @@ static void sequencer_clean(struct sequencer *self)
 
 	sequencer_reset(self);
 
-	self->_len      = 0u;
+	self->_len = 0u;
 }
 
 /** Updates sequencer, returns an event if exceed single entry timer.
  * Advances to the next entry after entry timer exceed.
  * Resets entry count to zero if last entry processed */
 static uint16_t sequencer_update(struct sequencer *self,
-				 uint16_t delta_time_ms)
+				 uint16_t	   delta_time_ms)
 {
 	uint8_t event = 0u;
 
@@ -166,7 +165,7 @@ static uint16_t sequencer_update(struct sequencer *self,
 		/* Wait for timer to exceed */
 		if (self->_timer_ms >= entry->timer_ms) {
 			self->_timer_ms -= entry->timer_ms;
-			self->_iter     += 1u;
+			self->_iter	+= 1u;
 
 			/* and emit event */
 			event = entry->event;

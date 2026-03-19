@@ -19,14 +19,14 @@ void sequencer_test_generic(struct sequencer *self)
 	assert(sequencer_get_entry_count(self) == 0u);
 
 	/* Test no capacity after exceed */
-	assert(sequencer_add_entry(self, 0u,   37u) == true);
+	assert(sequencer_add_entry(self, 0u, 37u) == true);
 	assert(sequencer_add_entry(self, 100u, 38u) == true);
 	assert(sequencer_add_entry(self, 100u, 39u) == true);
 	assert(sequencer_add_entry(self, 100u, 40u) == false);
 	assert(sequencer_get_entry_count(self) == 3u);
 
 	/* Test all entries events */
-	assert(sequencer_update(self, 0u)   == 37u);
+	assert(sequencer_update(self, 0u) == 37u);
 	assert(sequencer_update(self, 100u) == 38u);
 	assert(sequencer_update(self, 100u) == 39u);
 	assert(sequencer_get_entry_count(self) == 3u);
@@ -59,7 +59,7 @@ void sequencer_test_generic(struct sequencer *self)
 
 int main()
 {
-	struct sequencer seq;
+	struct sequencer       seq;
 	struct sequencer_entry entries[3u];
 	sequencer_init(&seq, entries, 3u);
 
