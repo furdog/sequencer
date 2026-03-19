@@ -27,7 +27,8 @@
  * Be free, be wise and take care of yourself!
  * With best wishes and respect, furdog
  */
-#pragma once
+#ifndef SEQUENCER_HEADER_GUARD
+#define SEQUENCER_HEADER_GUARD
 
 #include <assert.h>
 #include <stdbool.h>
@@ -61,9 +62,36 @@ struct sequencer {
 	uint8_t _mode;
 };
 
+/*--------------------------------------------------------------- PUBLIC API */
 /** Initializes sequencer, takes entries array and its capacity to work with */
-static void sequencer_init(struct sequencer	  *self,
-			   struct sequencer_entry *entries, size_t capacity)
+void sequencer_init(struct sequencer *self, struct sequencer_entry *entries,
+		    size_t capacity);
+
+/** Sets sequencer working mode. SEQUENCER_MODE_SINGLE is default */
+void sequencer_set_mode(struct sequencer *self, uint8_t mode);
+
+/** Adds entry into a sequencer, return false if no capacity */
+bool sequencer_add_entry(struct sequencer *self, uint16_t timer_ms,
+			 uint8_t event);
+
+/** Returns sequencer entry count */
+size_t sequencer_get_entry_count(struct sequencer *self);
+
+/** Resets the sequencer (starts from very beginning) */
+void sequencer_reset(struct sequencer *self);
+
+/** Resets and cleanups the sequencer (zeroes entry count) */
+void sequencer_clean(struct sequencer *self);
+
+/** Updates sequencer, returns an event if exceed single entry timer.
+ * Advances to the next entry after entry timer exceed.
+ * Resets entry count to zero if last entry processed */
+uint16_t sequencer_update(struct sequencer *self, uint16_t delta_time_ms);
+/*---------------------------------------------------------------------------*/
+
+#ifdef SEQUENCER_IMPLEMENTATION
+void sequencer_init(struct sequencer *self, struct sequencer_entry *entries,
+		    size_t capacity)
 {
 	assert(self && entries && (capacity > 0u));
 
@@ -78,17 +106,15 @@ static void sequencer_init(struct sequencer	  *self,
 	self->_mode = SEQUENCER_MODE_SINGLE;
 }
 
-/** Sets sequencer working mode. SEQUENCER_MODE_SINGLE is default */
-static void sequencer_set_mode(struct sequencer *self, uint8_t mode)
+void sequencer_set_mode(struct sequencer *self, uint8_t mode)
 {
 	assert(self && (mode < (uint8_t)SEQUENCER_MODES));
 
 	self->_mode = mode;
 }
 
-/** Adds entry into a sequencer, return false if no capacity */
-static bool sequencer_add_entry(struct sequencer *self, uint16_t timer_ms,
-				uint8_t event)
+bool sequencer_add_entry(struct sequencer *self, uint16_t timer_ms,
+			 uint8_t event)
 {
 	bool has_capacity = true;
 
@@ -107,16 +133,14 @@ static bool sequencer_add_entry(struct sequencer *self, uint16_t timer_ms,
 	return has_capacity;
 }
 
-/** Returns sequencer entry count */
-static size_t sequencer_get_entry_count(struct sequencer *self)
+size_t sequencer_get_entry_count(struct sequencer *self)
 {
 	assert(self);
 
 	return self->_len;
 }
 
-/** Resets the sequencer (starts from very beginning) */
-static void sequencer_reset(struct sequencer *self)
+void sequencer_reset(struct sequencer *self)
 {
 	assert(self);
 
@@ -124,8 +148,7 @@ static void sequencer_reset(struct sequencer *self)
 	self->_timer_ms = 0u;
 }
 
-/** Resets and cleanups the sequencer (zeroes entry count) */
-static void sequencer_clean(struct sequencer *self)
+void sequencer_clean(struct sequencer *self)
 {
 	assert(self);
 
@@ -134,11 +157,7 @@ static void sequencer_clean(struct sequencer *self)
 	self->_len = 0u;
 }
 
-/** Updates sequencer, returns an event if exceed single entry timer.
- * Advances to the next entry after entry timer exceed.
- * Resets entry count to zero if last entry processed */
-static uint16_t sequencer_update(struct sequencer *self,
-				 uint16_t	   delta_time_ms)
+uint16_t sequencer_update(struct sequencer *self, uint16_t delta_time_ms)
 {
 	uint8_t event = 0u;
 
@@ -174,3 +193,6 @@ static uint16_t sequencer_update(struct sequencer *self,
 
 	return event;
 }
+#endif /* SEQUENCER_IMPLEMENTATION */
+
+#endif /* SEQUENCER_HEADER_GUARD */

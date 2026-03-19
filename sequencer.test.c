@@ -1,3 +1,4 @@
+#define SEQUENCER_IMPLEMENTATION
 #include "sequencer.h"
 
 void sequencer_test_generic(struct sequencer *self)
